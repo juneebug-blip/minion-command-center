@@ -50,11 +50,11 @@ def seed():
 seed()
 app=FastAPI(title='MINION Command Center',version='1.1'); app.add_middleware(SessionMiddleware,secret_key=os.getenv('SESSION_SECRET',secrets.token_hex(32)),max_age=86400*7,https_only=False)
 CSS='''<style>
-*{box-sizing:border-box}body{margin:0;background:#061019;color:#e8f0f6;font-family:Inter,Arial,sans-serif}.top{padding:15px 22px;border-bottom:1px solid #21303c;display:flex;justify-content:space-between;align-items:center;background:#091721}.brand{font-weight:900;letter-spacing:2px}.wrap{max-width:1600px;margin:auto;padding:16px}.card,.metric{background:#0e1a24;border:1px solid #21303c;border-radius:12px;padding:14px}.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:12px 0}.num{font-size:24px;font-weight:800}.muted{color:#91a5b5;font-size:12px}.pill{padding:4px 8px;border-radius:99px;background:#152633;font-size:10px}.btn{display:inline-block;padding:9px 13px;background:#e8f0f6;color:#071018;border-radius:8px;text-decoration:none;font-weight:800;border:0;cursor:pointer}.log{background:#08131c;padding:12px;border-radius:9px;white-space:pre-wrap;max-height:360px;overflow:auto}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.money{font-size:22px;font-weight:900}a{color:inherit;text-decoration:none}input{width:100%;padding:10px;background:#0b1720;color:white;border:1px solid #2a3b47;border-radius:8px;margin:7px 0 11px}
+*{box-sizing:border-box}body{margin:0;background:#061019;color:#e8f0f6;font-family:Inter,Arial,sans-serif}.top{padding:15px 22px;border-bottom:1px solid #21303c;display:flex;justify-content:space-between;align-items:center;background:#091721}.brand{font-weight:900;letter-spacing:2px}.wrap{max-width:1600px;margin:auto;padding:16px}.card,.metric{background:#0e1a24;border:1px solid #21303c;border-radius:12px;padding:14px}.metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:12px 0}.num{font-size:24px;font-weight:800}.muted{color:#91a5b5;font-size:12px}.pill{padding:4px 8px;border-radius:99px;background:#152633;font-size:10px}.btn{display:inline-block;padding:9px 13px;background:#e8f0f6;color:#071018;border-radius:8px;text-decoration:none;font-weight:800;border:0;cursor:pointer}.log{background:#08131c;padding:12px;border-radius:9px;white-space:pre-wrap;max-height:360px;overflow:auto}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.money{font-size:22px;font-weight:900}a{color:inherit;text-decoration:none}input,textarea{width:100%;padding:10px;background:#0b1720;color:white;border:1px solid #2a3b47;border-radius:8px;margin:7px 0 11px}textarea{min-height:100px;resize:vertical;background:#0b1720;color:white;border:1px solid #2a3b47;border-radius:8px}
 .city-layout{display:grid;grid-template-columns:minmax(700px,1fr) 300px;gap:12px}.city{position:relative;height:760px;overflow:hidden;border:1px solid #29404f;border-radius:14px;background:linear-gradient(145deg,#183c2b 0%,#102d23 48%,#0d251d 100%);box-shadow:inset 0 0 80px #0008}.road{position:absolute;background:#27333a;border:1px solid #3a474e;z-index:1}.road.h{height:8%;left:0;width:100%}.road.v{width:6%;top:0;height:100%}.road:after{content:'';position:absolute;left:0;top:48%;width:100%;border-top:1px dashed #9b8d54}.road.v:after{top:0;left:48%;height:100%;width:0;border-top:0;border-left:1px dashed #9b8d54}
-.building{position:absolute;z-index:2;border:2px solid #415764;border-radius:8px;background:linear-gradient(135deg,#1b2c35,#0c1820);box-shadow:10px 12px 0 #07101899,0 0 20px #0007;padding:7px;overflow:hidden}.building:before{content:'';position:absolute;inset:7px;border:1px solid #6d849144;pointer-events:none}.building .roof{font-size:10px;font-weight:900;letter-spacing:.5px}.building .sub{font-size:8px;color:#8fa9b7}.building.hq{background:linear-gradient(135deg,#243642,#111d25);border-color:#d3aa39}.building.lab{background:linear-gradient(135deg,#163d4b,#0c1d28)}.building.warehouse{background:repeating-linear-gradient(90deg,#26333a 0 18px,#1b272d 18px 21px)}.building.market{background:linear-gradient(135deg,#402a1b,#1e1711)}.building.power{background:linear-gradient(135deg,#243b37,#10231f)}.building.homes{background:linear-gradient(135deg,#3b2c25,#1d1714)}.building.construction{border-style:dashed;background:repeating-linear-gradient(45deg,#3d3318,#3d3318 8px,#1d1b12 8px,#1d1b12 16px)}
+.building{appearance:none;color:inherit;text-align:left;cursor:pointer;position:absolute;z-index:2;border:2px solid #415764;border-radius:8px;background:linear-gradient(135deg,#1b2c35,#0c1820);box-shadow:10px 12px 0 #07101899,0 0 20px #0007;padding:7px;overflow:hidden}.building:before{content:'';position:absolute;inset:7px;border:1px solid #6d849144;pointer-events:none}.building .roof{font-size:10px;font-weight:900;letter-spacing:.5px}.building .sub{font-size:8px;color:#8fa9b7}.building.hq{background:linear-gradient(135deg,#243642,#111d25);border-color:#d3aa39}.building.lab{background:linear-gradient(135deg,#163d4b,#0c1d28)}.building.warehouse{background:repeating-linear-gradient(90deg,#26333a 0 18px,#1b272d 18px 21px)}.building.market{background:linear-gradient(135deg,#402a1b,#1e1711)}.building.power{background:linear-gradient(135deg,#243b37,#10231f)}.building.homes{background:linear-gradient(135deg,#3b2c25,#1d1714)}.building.construction{border-style:dashed;background:repeating-linear-gradient(45deg,#3d3318,#3d3318 8px,#1d1b12 8px,#1d1b12 16px)}
 .progress{height:5px;background:#08131c;border-radius:5px;margin-top:6px;overflow:hidden}.progress i{display:block;height:100%;background:#5ad987}.tree{position:absolute;z-index:2;width:16px;height:16px;border-radius:50%;background:#2d6a3d;box-shadow:0 8px 0 -5px #725139}.lamp{position:absolute;z-index:3;width:4px;height:4px;border-radius:50%;background:#ffd76a;box-shadow:0 0 10px #ffd76a}
-.minion{position:absolute;width:18px;height:27px;border-radius:45% 45% 38% 38%;background:#f1c84b;border:1px solid #c99f22;color:#081018;font-size:5px;font-weight:900;text-align:center;padding-top:11px;z-index:8;transition:left 2.8s linear,top 2.8s linear;box-shadow:0 2px 4px #0008}.minion:before{content:'';position:absolute;left:3px;top:4px;width:10px;height:6px;border-radius:7px;background:#dce8ee;border:1px solid #26333a}.minion:after{content:'';position:absolute;left:2px;bottom:-4px;width:12px;height:8px;background:#315b91;border-radius:2px}.minion.sleeping{opacity:.45;filter:saturate(.6)}.minion.building{animation:hammer .55s infinite alternate}.minion.social{animation:bob .8s infinite alternate}.tool{position:absolute;right:-7px;top:10px;font-size:9px}.bubble{position:absolute;left:15px;top:-13px;background:#fff;color:#111;border-radius:7px;padding:2px 4px;font-size:6px;white-space:nowrap;display:none}.minion:hover .bubble{display:block}@keyframes hammer{to{transform:rotate(-7deg)}}@keyframes bob{to{transform:translateY(-2px)}}
+.minion{appearance:none;cursor:pointer;position:absolute;width:18px;height:27px;border-radius:45% 45% 38% 38%;background:#f1c84b;border:1px solid #c99f22;color:#081018;font-size:5px;font-weight:900;text-align:center;padding-top:11px;z-index:8;transition:left 2.8s linear,top 2.8s linear;box-shadow:0 2px 4px #0008}.minion:before{content:'';position:absolute;left:3px;top:4px;width:10px;height:6px;border-radius:7px;background:#dce8ee;border:1px solid #26333a}.minion:focus{outline:2px solid #fff;outline-offset:3px}.building:focus{outline:2px solid #fff;outline-offset:3px}.minion:after{content:'';position:absolute;left:2px;bottom:-4px;width:12px;height:8px;background:#315b91;border-radius:2px}.minion.sleeping{opacity:.45;filter:saturate(.6)}.minion.building{animation:hammer .55s infinite alternate}.minion.social{animation:bob .8s infinite alternate}.tool{position:absolute;right:-7px;top:10px;font-size:9px}.bubble{position:absolute;left:15px;top:-13px;background:#fff;color:#111;border-radius:7px;padding:2px 4px;font-size:6px;white-space:nowrap;display:none}.minion:hover .bubble{display:block}@keyframes hammer{to{transform:rotate(-7deg)}}@keyframes bob{to{transform:translateY(-2px)}}
 .side{display:flex;flex-direction:column;gap:10px}.activity{max-height:360px;overflow:auto}.event{padding:8px 0;border-bottom:1px solid #1b2c36;font-size:11px}.event b{display:block}.legend{position:absolute;left:12px;bottom:12px;z-index:12;background:#071018dd;border:1px solid #29404f;border-radius:9px;padding:8px;font-size:9px}.city-title{position:absolute;left:12px;top:12px;z-index:12;background:#071018dd;border:1px solid #29404f;border-radius:9px;padding:8px 10px}.statusbar{position:absolute;right:12px;top:12px;z-index:12;background:#071018dd;border:1px solid #29404f;border-radius:9px;padding:8px 10px;font-size:9px}
 @media(max-width:1000px){.city-layout{grid-template-columns:1fr}.city{height:680px}.metrics{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.wrap{padding:8px}.top{padding:12px}.city{height:600px;min-width:680px}.city-layout{overflow-x:auto}}
 </style>'''
@@ -76,44 +76,61 @@ def command(request:Request):
     if not authed(request): return RedirectResponse('/login')
     with Session(engine) as s:
         agents=s.query(Agent).order_by(Agent.code).all(); treasury=s.query(Treasury).first()
-        structures=s.query(WorldStructure).all(); proposals=s.query(Proposal).order_by(Proposal.id.desc()).limit(6).all()
-        events=s.query(WorldEvent).order_by(WorldEvent.id.desc()).limit(18).all()
-        working=sum(a.status=='working' for a in agents); sleeping=sum(a.status=='sleeping' for a in agents)
+        structures=s.query(WorldStructure).all(); events=s.query(WorldEvent).order_by(WorldEvent.id.desc()).limit(14).all()
+        working=sum(x.status=='working' for x in agents); sleeping=sum(x.status=='sleeping' for x in agents)
         queued=s.query(Task).filter(Task.status=='queued').count(); done=s.query(Task).filter(Task.status=='completed').count()
+        errors=sum(1 for w in s.query(Workspace).all() if (w.desk_notes or '').startswith('Last error:'))
         roads='<div class="road h" style="top:30%"></div><div class="road h" style="top:61%"></div><div class="road v" style="left:30%"></div><div class="road v" style="left:62%"></div>'
         decor=''.join(f'<span class="tree" style="left:{(i*17)%96}%;top:{(i*29)%94}%"></span>' for i in range(22))
-        buildings=''
         sizes={'hq':(18,16),'lab':(20,14),'warehouse':(19,15),'market':(20,14),'power':(17,13),'homes':(24,16),'construction':(22,18)}
-        for b in structures:
-            w,h=sizes.get(b.kind,(18,14)); label='BUILDING' if b.progress<100 else 'ACTIVE'
-            buildings+=f'<div class="building {b.kind}" data-kind="{b.kind}" style="left:{b.x}%;top:{b.y}%;width:{w}%;height:{h}%"><div class="roof">{b.name}</div><div class="sub">{label} · LVL {b.level} · {int(b.progress)}%</div><div class="progress"><i style="width:{min(100,b.progress)}%"></i></div></div>'
-        destinations={'Market Intelligence':(72,18),'Sourcing':(38,17),'Product Underwriting':(72,18),'Sales & Listings':(74,72),'Operations':(13,52),'Risk & Audit':(48,44),'Command':(49,46)}
+        buildings=''
+        for x in structures:
+            w,h=sizes.get(x.kind,(18,14))
+            buildings+=f'<button type="button" class="building {x.kind}" data-building="{x.kind}" style="left:{x.x}%;top:{x.y}%;width:{w}%;height:{h}%"><div class="roof">{x.name}</div><div class="sub">LVL {x.level} · {int(x.progress)}%</div><div class="progress"><i style="width:{min(100,x.progress)}%"></i></div></button>'
         avatars=''
-        for a in agents:
-            n=int(a.code) if a.code!='000' else 0; dx,dy=destinations.get(a.division,(48,45))
-            x=dx+((n%5)-2)*2; y=dy+(((n//5)%4)-2)*2
-            activity='Working' if a.status=='working' else ('Sleeping' if a.status=='sleeping' else 'City duty')
-            tool='🔨' if a.status!='sleeping' and n%4==0 else ('📦' if n%4==1 else ('💻' if n%4==2 else '🔧'))
-            avatars+=f'<a href="/minion/{a.code}" class="minion {a.status}" data-code="{a.code}" data-status="{a.status}" data-division="{a.division}" style="left:{x}%;top:{y}%"><span class="tool">{tool}</span><span class="bubble">#{a.code} · {activity}</span>{a.code}</a>'
-        feed=''.join(f'<div class="event"><b>{e.event.replace("_"," ").title()}</b>{e.detail}</div>' for e in events) or '<div class="muted">City systems starting...</div>'
-        prop=''.join(f'<div class="event"><b>{p.title}</b>USD {p.amount:,.2f} proposal · est. profit USD {p.est_profit:,.2f}</div>' for p in proposals) or '<div class="muted">No spending proposals yet.</div>'
-        body=f'''<div class="top"><div><div class="brand">MINION WORLD // AUTONOMOUS CITY</div><div class="muted">Commander #000 · persistent world simulation + AI workforce</div></div><a href="/logout" class="muted">Logout</a></div>
-<div class="wrap"><div class="metrics"><div class="metric"><div class="num">101</div><div class="muted">POPULATION</div></div><div class="metric"><div class="num">{working}</div><div class="muted">AI WORKING</div></div><div class="metric"><div class="num">{sleeping}</div><div class="muted">SLEEPING</div></div><div class="metric"><div class="num">{queued}</div><div class="muted">JOBS QUEUED</div></div><div class="metric"><div class="num">{done}</div><div class="muted">JOBS COMPLETED</div></div></div>
-<div class="city-layout"><div class="city" id="city">{roads}{decor}{buildings}{avatars}<div class="city-title"><b>LIVE CITY VIEW</b><div class="muted">The world keeps progressing while this page is closed.</div></div><div class="statusbar">AUTO SHIFTS: ON · CITY BUILD: ON</div><div class="legend">🔨 build · 📦 logistics · 💻 research · 🔧 maintenance<br>Green work continues server-side; movement is a live visualization of assigned activity.</div></div>
-<div class="side"><div class="card"><h3 style="margin-top:0">TREASURY</h3><div class="money">USD {treasury.available_cash:,.2f}</div><div class="muted">Daily proposal ceiling USD {treasury.daily_limit:,.2f}</div><form method="post" action="/treasury"><input name="cash" type="number" min="0" step=".01" placeholder="Available cash"><input name="daily_limit" type="number" min="0" max="500" step=".01" value="{treasury.daily_limit}"><button class="btn">UPDATE</button></form></div><div class="card"><h3 style="margin-top:0">LIVE CITY ACTIVITY</h3><div class="activity">{feed}</div></div><div class="card"><h3 style="margin-top:0">OPPORTUNITIES</h3>{prop}</div><form method="post" action="/commander/bootstrap"><button class="btn" style="width:100%">ASSIGN BUSINESS MISSIONS</button></form></div></div></div>
+        for x in agents:
+            n=int(x.code) if x.code!='000' else 0
+            avatars+=f'<button type="button" class="minion {x.status}" data-code="{x.code}" data-name="{x.name}" data-status="{x.status}" data-division="{x.division}" style="left:{42+(n%9)*1.8}%;top:{40+((n//9)%7)*2.3}%"><span class="tool">🔧</span><span class="bubble">#{x.code}</span>{x.code}</button>'
+        feed=''.join(f'<div class="event"><b>{e.event.replace("_"," ").title()}</b>{e.detail}</div>' for e in events) or '<div class="muted">World online.</div>'
+        api_state='READY' if os.getenv('OPENAI_API_KEY') else 'NO OPENAI_API_KEY'
+        body=f'''<div class="top"><div><div class="brand">MINION WORLD // OPERATIONS SIMULATOR</div><div class="muted">Persistent autonomous city · interactive workforce</div></div><a href="/logout" class="muted">Logout</a></div>
+<div class="wrap"><div class="metrics"><div class="metric"><div class="num">101</div><div class="muted">POPULATION</div></div><div class="metric"><div class="num">{working}</div><div class="muted">REAL AI JOBS RUNNING</div></div><div class="metric"><div class="num">{sleeping}</div><div class="muted">OFF SHIFT</div></div><div class="metric"><div class="num">{queued}</div><div class="muted">MISSION QUEUE</div></div><div class="metric"><div class="num">{done}</div><div class="muted">COMPLETED</div></div></div>
+<div class="city-layout"><div class="city game-city" id="city">{roads}{decor}{buildings}{avatars}
+<div class="city-title"><b>LIVE OPERATIONS MAP</b><div class="muted">Click any worker or facility.</div></div>
+<div class="statusbar">AI: {api_state} · ERRORS: {errors} · SHIFTS: AUTO</div>
+<div class="legend">Characters now use multi-stage activity loops: walk → arrive → animate task → deliver/socialize/rest → next destination.</div></div>
+<div class="side">
+<div class="card inspector" id="inspector"><h3 style="margin-top:0">CITY INSPECTOR</h3><div id="inspectText" class="muted">Select a worker or building on the map.</div><div id="inspectActions"></div></div>
+<div class="card"><h3 style="margin-top:0">CREATE MISSION</h3><form method="post" action="/missions/create"><input id="assignedCode" name="assigned_code" placeholder="Worker # (optional)"><input name="title" required maxlength="200" placeholder="Mission title"><textarea name="instructions" required maxlength="5000" placeholder="What should they actually accomplish?"></textarea><button class="btn" style="width:100%">DISPATCH MISSION</button></form></div>
+<div class="card"><h3 style="margin-top:0">SYSTEM</h3><div class="muted">Treasury USD {treasury.available_cash:,.2f} · proposal limit USD {treasury.daily_limit:,.2f}</div><div class="muted" style="margin-top:7px">AI backend: <b>{api_state}</b> · worker errors: <b>{errors}</b></div></div>
+<div class="card"><h3 style="margin-top:0">EVENT LOG</h3><div class="activity">{feed}</div></div>
+</div></div></div>
 <script>
-const targets={{'Market Intelligence':[72,18],'Sourcing':[38,17],'Product Underwriting':[72,18],'Sales & Listings':[74,72],'Operations':[13,52],'Risk & Audit':[48,44],'Command':[49,46]}};
-function moveLife(){{
- document.querySelectorAll('.minion').forEach((m,i)=>{{
-  let s=m.dataset.status, d=targets[m.dataset.division]||[49,46], x=d[0], y=d[1];
-  m.classList.remove('building','social');
-  if(s==='sleeping'){{x=48+(i%7)*3;y=77+((i%3)*3);}}
-  else if(s==='working'){{x+=Math.random()*12-6;y+=Math.random()*10-5;if(i%5===0)m.classList.add('building');}}
-  else {{let mode=(Date.now()/6000+i)%3;if(mode<1){{x=39+Math.random()*18;y=36+Math.random()*18;m.classList.add('social')}}else if(mode<2){{x=34+Math.random()*24;y=66+Math.random()*18}}else{{x=20+Math.random()*55;y=33+Math.random()*30}}}}
-  m.style.left=Math.max(3,Math.min(95,x))+'%';m.style.top=Math.max(5,Math.min(94,y))+'%';
- }});
+const root=document.getElementById('city'), assigned=document.getElementById('assignedCode'), inspect=document.getElementById('inspectText'), acts=document.getElementById('inspectActions');
+const places={{hq:[50,46],lab:[75,20],warehouse:[15,53],market:[76,72],power:[15,76],homes:[50,77],construction:[42,17],road1:[34,45],road2:[59,57]}};
+const activity={{
+ 'Market Intelligence':['lab','hq','market'],'Sourcing':['market','warehouse','hq'],'Product Underwriting':['lab','hq','market'],
+ 'Sales & Listings':['market','hq','lab'],'Operations':['warehouse','construction','power'],'Risk & Audit':['hq','lab','construction'],'Command':['hq','road1','road2']
+}};
+const verbs={{lab:['researching','typing','analyzing'],warehouse:['loading','sorting','delivering'],market:['scouting','pricing','meeting'],power:['repairing','inspecting','maintaining'],homes:['eating','socializing','resting'],construction:['building','carrying','hammering'],hq:['planning','reporting','coordinating'],road1:['walking','delivering','patrolling'],road2:['walking','talking','delivering']}};
+const icons={{researching:'💻',typing:'⌨️',analyzing:'📊',loading:'📦',sorting:'📦',delivering:'📦',scouting:'🔎',pricing:'🏷️',meeting:'💬',repairing:'🔧',inspecting:'🔍',maintaining:'🧰',eating:'🍽️',socializing:'💬',resting:'💤',building:'🔨',carrying:'🧱',hammering:'🔨',planning:'📋',reporting:'📄',coordinating:'📡',walking:'',talking:'💬',patrolling:'🔦'}};
+function nextAction(m){{
+ let st=m.dataset.status, pool=activity[m.dataset.division]||['hq'];
+ if(st==='sleeping') pool=['homes'];
+ else if(st==='working' && Math.random()<.45) pool=[pool[0]];
+ else if(st!=='working' && Math.random()<.35) pool=['homes','road1','road2'];
+ let p=pool[Math.floor(Math.random()*pool.length)], base=places[p], v=verbs[p][Math.floor(Math.random()*verbs[p].length)];
+ let x=base[0]+Math.random()*10-5,y=base[1]+Math.random()*9-4.5;
+ m.dataset.action=v;m.querySelector('.tool').textContent=icons[v]||'';
+ m.classList.toggle('building',v==='building'||v==='hammering'||v==='repairing');
+ m.classList.toggle('social',v==='socializing'||v==='talking');
+ m.style.left=Math.max(2,Math.min(96,x))+'%';m.style.top=Math.max(4,Math.min(94,y))+'%';
+ m.title='#'+m.dataset.code+' · '+v;
+ setTimeout(()=>nextAction(m),2200+Math.random()*4200);
 }}
-setInterval(moveLife,3000);setTimeout(moveLife,400);setTimeout(()=>location.reload(),20000);
+document.querySelectorAll('.minion').forEach((m,i)=>{{setTimeout(()=>nextAction(m),i*45);m.addEventListener('click',()=>{{assigned.value=m.dataset.code;inspect.innerHTML='<b>'+m.dataset.name+' #'+m.dataset.code+'</b><br>'+m.dataset.division+'<br>Status: '+m.dataset.status+'<br>Visible action: '+(m.dataset.action||'starting');acts.innerHTML='<a class="btn" style="margin-top:10px" href="/minion/'+m.dataset.code+'">OPEN WORKSPACE</a>';}})}});
+document.querySelectorAll('.building').forEach(b=>b.addEventListener('click',()=>{{inspect.innerHTML='<b>'+b.dataset.building.toUpperCase()+'</b><br>Operational city facility. Workers travel here as part of multi-stage routines.';acts.innerHTML='';}}));
+setTimeout(()=>location.reload(),60000);
 </script>'''
         return page('MINION World',body)
 @app.get('/minion/{code}',response_class=HTMLResponse)
@@ -186,6 +203,20 @@ def run_cycle():
         s.commit()
     if claimed:
         with concurrent.futures.ThreadPoolExecutor(max_workers=len(claimed)) as pool: list(pool.map(lambda pair:_worker_task(*pair),claimed))
+
+@app.post('/missions/create')
+def create_mission_ui(request:Request,title:str=Form(...),instructions:str=Form(...),assigned_code:str=Form('')):
+    if not authed(request): return RedirectResponse('/login',303)
+    title=title.strip()[:200]; instructions=instructions.strip()[:5000]; assigned_code=assigned_code.strip()
+    if not title or not instructions: return RedirectResponse('/command',303)
+    with Session(engine) as s:
+        aid=None
+        if assigned_code:
+            a=s.query(Agent).filter(Agent.code==assigned_code).first()
+            if a: aid=a.id
+        t=Task(title=title,instructions=instructions,assigned_agent=aid,priority=90)
+        s.add(t); s.add(WorldEvent(agent_id=aid,event='mission_created',detail=f'{title} assigned to #{assigned_code}' if assigned_code else title)); s.commit()
+    return RedirectResponse('/command',303)
 
 @app.post('/treasury')
 def update_treasury(request:Request,cash:float=Form(...),daily_limit:float=Form(...)):
