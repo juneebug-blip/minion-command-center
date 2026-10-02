@@ -122,14 +122,14 @@ C.addEventListener('pointerdown',e=>{{let r=C.getBoundingClientRect(),wx=(e.clie
 document.addEventListener('keydown',e=>{{if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;keys[e.key.toLowerCase()]=true;if(e.key===' '){{paused=!paused;e.preventDefault()}}}});document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);setInterval(()=>{{if(follow)return;let s=18;if(keys.w||keys.arrowup)cam.y-=s;if(keys.s||keys.arrowdown)cam.y+=s;if(keys.a||keys.arrowleft)cam.x-=s;if(keys.d||keys.arrowright)cam.x+=s}},30);
 document.getElementById('follow').onclick=()=>follow=!follow;document.getElementById('overview').onclick=()=>{{follow=false;cam.x=560;cam.y=440}};document.getElementById('pause').onclick=()=>paused=!paused;document.getElementById('speed').onclick=e=>{{speed=speed===1?2:speed===2?4:1;e.target.textContent='SPEED '+speed+'×'}};
 
-async function syncWorld(){
- try{
+async function syncWorld(){{
+ try{{
   const r=await fetch('/api/world'); if(!r.ok)return; const w=await r.json();
   const by=Object.fromEntries(w.agents.map(a=>[a.code,a]));
-  people.forEach(p=>{const a=by[p.code];if(!a)return;const changed=p.serverZone!==a.zone||p.task_id!==a.task_id;p.status=a.status;p.serverZone=a.zone;p.task_id=a.task_id;p.task_title=a.task_title;p.realAction=a.action;p.activity_kind=a.activity_kind;p.energy=a.energy/100;if(changed){let q=pl(a.zone)||pl('hq');p.target=a.zone;p.tx=rnd(q.x+30,q.x+q.w-30);p.ty=rnd(q.y+40,q.y+q.h-30);p.wait=0;}if(a.activity_kind==='real_work'&&Math.hypot(p.tx-p.x,p.ty-p.y)<15)p.action=a.action;});
-  if(selected){const a=by[selected.code];if(a)document.getElementById('person').innerHTML='<b>'+a.name+' #'+a.code+'</b><small>'+a.division+' · '+a.status+'<br><strong>'+(a.activity_kind==='real_work'?'REAL WORK':'CITY LIFE')+'</strong>: '+a.action+(a.task_title?'<br>Task: '+a.task_title:'')+'</small>';}
- }catch(e){}
-}
+  people.forEach(p=>{{const a=by[p.code];if(!a)return;const changed=p.serverZone!==a.zone||p.task_id!==a.task_id;p.status=a.status;p.serverZone=a.zone;p.task_id=a.task_id;p.task_title=a.task_title;p.realAction=a.action;p.activity_kind=a.activity_kind;p.energy=a.energy/100;if(changed){{let q=pl(a.zone)||pl('hq');p.target=a.zone;p.tx=rnd(q.x+30,q.x+q.w-30);p.ty=rnd(q.y+40,q.y+q.h-30);p.wait=0;}}if(a.activity_kind==='real_work'&&Math.hypot(p.tx-p.x,p.ty-p.y)<15)p.action=a.action;}});
+  if(selected){{const a=by[selected.code];if(a)document.getElementById('person').innerHTML='<b>'+a.name+' #'+a.code+'</b><small>'+a.division+' · '+a.status+'<br><strong>'+(a.activity_kind==='real_work'?'REAL WORK':'CITY LIFE')+'</strong>: '+a.action+(a.task_title?'<br>Task: '+a.task_title:'')+'</small>';}}
+ }}catch(e){{}}
+}}
 syncWorld();setInterval(syncWorld,3000);
 </script>'''
         body=body.replace('__AGENT_DATA__',json.dumps(agent_data))
