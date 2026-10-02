@@ -30,6 +30,19 @@ class WorldEvent(Base):
     __tablename__='world_events'; id:Mapped[int]=mapped_column(Integer,primary_key=True); agent_id:Mapped[Optional[int]]=mapped_column(Integer,nullable=True); event:Mapped[str]=mapped_column(String(80)); detail:Mapped[str]=mapped_column(Text,default=''); created_at:Mapped[dt.datetime]=mapped_column(DateTime,default=dt.datetime.utcnow)
 class WorldStructure(Base):
     __tablename__='world_structures'; id:Mapped[int]=mapped_column(Integer,primary_key=True); key:Mapped[str]=mapped_column(String(40),unique=True); name:Mapped[str]=mapped_column(String(100)); kind:Mapped[str]=mapped_column(String(40)); level:Mapped[int]=mapped_column(Integer,default=1); progress:Mapped[float]=mapped_column(Float,default=0); x:Mapped[float]=mapped_column(Float,default=0); y:Mapped[float]=mapped_column(Float,default=0); workers:Mapped[int]=mapped_column(Integer,default=0); updated_at:Mapped[dt.datetime]=mapped_column(DateTime,default=dt.datetime.utcnow)
+class AgentWorldState(Base):
+    __tablename__='agent_world_state'
+    id:Mapped[int]=mapped_column(Integer,primary_key=True)
+    agent_id:Mapped[int]=mapped_column(ForeignKey('agents.id'),unique=True)
+    zone:Mapped[str]=mapped_column(String(40),default='homes')
+    action:Mapped[str]=mapped_column(String(80),default='resting')
+    activity_kind:Mapped[str]=mapped_column(String(30),default='life')
+    task_id:Mapped[Optional[int]]=mapped_column(Integer,nullable=True)
+    x:Mapped[float]=mapped_column(Float,default=50)
+    y:Mapped[float]=mapped_column(Float,default=72)
+    energy:Mapped[float]=mapped_column(Float,default=100)
+    updated_at:Mapped[dt.datetime]=mapped_column(DateTime,default=dt.datetime.utcnow)
+
 Base.metadata.create_all(engine)
 DIVISIONS=[('Market Intelligence',1,20,'Track demand, trends, categories, keywords, competitors and customer pain points.'),('Sourcing',21,40,'Find legitimate suppliers, manufacturers, wholesale pricing, MOQs, freight and lead times.'),('Product Underwriting',41,60,'Calculate landed cost, fees, margins, ROI, demand quality and opportunity scores.'),('Sales & Listings',61,75,'Prepare compliant listing research, positioning, pricing and merchandising recommendations.'),('Operations',76,90,'Monitor inventory proposals, replenishment, logistics, task throughput and performance.'),('Risk & Audit',91,100,'Audit evidence, duplicates, IP/policy risk, supplier risk, financial assumptions and agent quality.')]
 def seed():
@@ -47,6 +60,12 @@ def seed():
             starter=[('hq','COMMAND HQ','hq',44,40),('lab','RESEARCH LAB','lab',67,14),('warehouse','WAREHOUSE','warehouse',8,48),('market','MARKETPLACE','market',69,67),('power','POWER YARD','power',9,72),('homes','MINION VILLAGE','homes',45,72),('site','CITY EXPANSION','construction',35,12)]
             for key,name,kind,x,y in starter: s.add(WorldStructure(key=key,name=name,kind=kind,x=x,y=y,progress=25 if key=='site' else 100))
             s.commit()
+        # Ensure persistent world state records exist for every worker.
+        existing_states={r.agent_id for r in s.query(AgentWorldState).all()}
+        for a in s.query(Agent).all():
+            if a.id not in existing_states:
+                s.add(AgentWorldState(agent_id=a.id,zone='hq' if a.code=='000' else 'homes',action='commanding' if a.code=='000' else 'resting',activity_kind='life',x=50 if a.code=='000' else 48+(int(a.code)%9)-4,y=42 if a.code=='000' else 75+(int(a.code)%7)-3,energy=100))
+        s.commit()
 seed()
 app=FastAPI(title='MINION Command Center',version='1.1'); app.add_middleware(SessionMiddleware,secret_key=os.getenv('SESSION_SECRET',secrets.token_hex(32)),max_age=86400*7,https_only=False)
 CSS='''<style>
@@ -82,7 +101,7 @@ def command(request:Request):
         agent_data=[{'code':x.code,'name':x.name,'division':x.division,'status':x.status} for x in agents]
         api_state='ONLINE' if os.getenv('OPENAI_API_KEY') else 'OFFLINE'
         body=f'''<div id="ow"><div class="gamebar"><div><b>MINION WORLD</b><span>OPEN WORLD OPERATIONS</span></div><div class="game-stats"><span>AI {api_state}</span><span>{working} WORKING</span><span>{sleeping} RESTING</span><span>{queued} QUEUED</span><span>{done} DONE</span><span>USD {treasury.available_cash:,.2f}</span></div><a href="/logout">EXIT</a></div>
-<div class="viewport"><canvas id="world" width="1280" height="720" tabindex="0"></canvas><div class="hud top-left"><b id="clock">08:00</b><small>CITY ONLINE</small></div><div class="hud top-right"><b>COMMANDER NETWORK</b><small>AI {api_state} · ERRORS {errors}</small></div><div class="hud bottom-left"><div class="minimap"><canvas id="mini" width="150" height="100"></canvas></div><small>WASD / ARROWS · CLICK WORKER · SPACE PAUSE</small></div><div class="hud bottom-right" id="person"><b>CITY MODE</b><small>Click a worker to inspect their life and work.</small></div></div>
+<div style="max-width:1280px;margin:12px auto;background:#0b1720;border:1px solid #314651;border-radius:8px;padding:10px"><form method="post" action="/commander/mission" style="display:grid;grid-template-columns:1fr auto;gap:8px"><input name="objective" required placeholder="COMMANDER OBJECTIVE — tell the workforce what real work you want accomplished" style="margin:0"><button class="btn">DEPLOY WORKFORCE</button></form><div class="muted" style="margin-top:6px">Real AI assignments are delegated across specialist divisions. City-life activity is separate and clearly labeled.</div></div><div class="viewport"><canvas id="world" width="1280" height="720" tabindex="0"></canvas><div class="hud top-left"><b id="clock">08:00</b><small>CITY ONLINE</small></div><div class="hud top-right"><b>COMMANDER NETWORK</b><small>AI {api_state} · ERRORS {errors}</small></div><div class="hud bottom-left"><div class="minimap"><canvas id="mini" width="150" height="100"></canvas></div><small>WASD / ARROWS · CLICK WORKER · SPACE PAUSE</small></div><div class="hud bottom-right" id="person"><b>CITY MODE</b><small>Click a worker to inspect their life and work.</small></div></div>
 <div class="controlstrip"><button type="button" id="follow">FOLLOW SELECTED</button><button type="button" id="overview">CITY OVERVIEW</button><button type="button" id="speed">SPEED 1×</button><button type="button" id="pause">PAUSE</button><form method="post" action="/missions/create"><input id="worker" name="assigned_code" placeholder="Worker #"><input name="title" required placeholder="Mission"><input name="instructions" required placeholder="What should they accomplish?"><button>DISPATCH</button></form></div></div>
 <script>
 const DATA=__AGENT_DATA__;
@@ -102,6 +121,16 @@ function frame(t){{let dt=Math.min(50,t-last);last=t;update(dt);draw();requestAn
 C.addEventListener('pointerdown',e=>{{let r=C.getBoundingClientRect(),wx=(e.clientX-r.left)*C.width/r.width+cam.x,wy=(e.clientY-r.top)*C.height/r.height+cam.y,p=people.reduce((a,b)=>Math.hypot(b.x-wx,b.y-wy)<Math.hypot(a.x-wx,a.y-wy)?b:a,people[0]);if(Math.hypot(p.x-wx,p.y-wy)<35){{selected=p;document.getElementById('worker').value=p.code;document.getElementById('person').innerHTML='<b>'+p.name+' #'+p.code+'</b><small>'+p.division+' · '+p.status+'<br>'+p.action+'<br>Energy '+Math.round(p.energy*100)+'%</small>'}}}});
 document.addEventListener('keydown',e=>{{if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;keys[e.key.toLowerCase()]=true;if(e.key===' '){{paused=!paused;e.preventDefault()}}}});document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);setInterval(()=>{{if(follow)return;let s=18;if(keys.w||keys.arrowup)cam.y-=s;if(keys.s||keys.arrowdown)cam.y+=s;if(keys.a||keys.arrowleft)cam.x-=s;if(keys.d||keys.arrowright)cam.x+=s}},30);
 document.getElementById('follow').onclick=()=>follow=!follow;document.getElementById('overview').onclick=()=>{{follow=false;cam.x=560;cam.y=440}};document.getElementById('pause').onclick=()=>paused=!paused;document.getElementById('speed').onclick=e=>{{speed=speed===1?2:speed===2?4:1;e.target.textContent='SPEED '+speed+'×'}};
+
+async function syncWorld(){
+ try{
+  const r=await fetch('/api/world'); if(!r.ok)return; const w=await r.json();
+  const by=Object.fromEntries(w.agents.map(a=>[a.code,a]));
+  people.forEach(p=>{const a=by[p.code];if(!a)return;const changed=p.serverZone!==a.zone||p.task_id!==a.task_id;p.status=a.status;p.serverZone=a.zone;p.task_id=a.task_id;p.task_title=a.task_title;p.realAction=a.action;p.activity_kind=a.activity_kind;p.energy=a.energy/100;if(changed){let q=pl(a.zone)||pl('hq');p.target=a.zone;p.tx=rnd(q.x+30,q.x+q.w-30);p.ty=rnd(q.y+40,q.y+q.h-30);p.wait=0;}if(a.activity_kind==='real_work'&&Math.hypot(p.tx-p.x,p.ty-p.y)<15)p.action=a.action;});
+  if(selected){const a=by[selected.code];if(a)document.getElementById('person').innerHTML='<b>'+a.name+' #'+a.code+'</b><small>'+a.division+' · '+a.status+'<br><strong>'+(a.activity_kind==='real_work'?'REAL WORK':'CITY LIFE')+'</strong>: '+a.action+(a.task_title?'<br>Task: '+a.task_title:'')+'</small>';}
+ }catch(e){}
+}
+syncWorld();setInterval(syncWorld,3000);
 </script>'''
         body=body.replace('__AGENT_DATA__',json.dumps(agent_data))
         return page('MINION World',body)
@@ -190,6 +219,45 @@ def create_mission_ui(request:Request,title:str=Form(...),instructions:str=Form(
         s.add(t); s.add(WorldEvent(agent_id=aid,event='mission_created',detail=f'{title} assigned to #{assigned_code}' if assigned_code else title)); s.commit()
     return RedirectResponse('/command',303)
 
+@app.post('/commander/mission')
+def commander_mission(request:Request,objective:str=Form(...)):
+    if not authed(request): return RedirectResponse('/login',303)
+    objective=objective.strip()[:6000]
+    if not objective: return RedirectResponse('/command',303)
+    plans=[
+      ('Market Intelligence','Research demand, competitors, trends, customer pain points and evidence relevant to the owner objective.'),
+      ('Sourcing','Research legitimate suppliers, tools, resources, pricing, lead times and implementation options relevant to the objective.'),
+      ('Product Underwriting','Analyze economics, costs, revenue potential, ROI assumptions and rank viable approaches using evidence.'),
+      ('Sales & Listings','Develop positioning, go-to-market, outreach, listing or presentation work relevant to the objective.'),
+      ('Operations','Create an execution plan, workflow, logistics requirements, milestones and operating requirements for the objective.'),
+      ('Risk & Audit','Audit the objective and other likely outputs for legal, financial, supplier, evidence, duplication and execution risks.')
+    ]
+    with Session(engine) as s:
+        commander=s.query(Agent).filter(Agent.code=='000').first()
+        root=Task(title='COMMANDER: '+objective[:185],instructions='Owner objective: '+objective+'\nAct as Commander. Synthesize specialist outputs as they complete. Never spend money or take consequential external actions without owner approval.',assigned_agent=commander.id,priority=70)
+        s.add(root)
+        for division,instruction in plans:
+            workers=s.query(Agent).filter(Agent.division==division).order_by(Agent.id).limit(3).all()
+            for a in workers:
+                s.add(Task(title=division+': '+objective[:150],instructions='Owner objective: '+objective+'\nYour specialist assignment: '+instruction+'\nProduce useful work, cite evidence needed, and identify concrete next steps. Do not pretend simulated city activity is real work.',assigned_agent=a.id,priority=100))
+        s.add(WorldEvent(agent_id=commander.id,event='commander_delegated',detail='Commander created a cross-division work program: '+objective[:500]))
+        s.commit()
+    return RedirectResponse('/command',303)
+
+@app.get('/api/world')
+def world_api(request:Request):
+    if not authed(request): raise HTTPException(401,'login required')
+    with Session(engine) as s:
+        states={r.agent_id:r for r in s.query(AgentWorldState).all()}
+        workspaces={w.agent_id:w for w in s.query(Workspace).all()}
+        rows=[]
+        for a in s.query(Agent).order_by(Agent.code).all():
+            st=states.get(a.id); w=workspaces.get(a.id); task=s.get(Task,w.current_task_id) if w and w.current_task_id else None
+            rows.append({'id':a.id,'code':a.code,'name':a.name,'division':a.division,'status':a.status,'zone':st.zone if st else 'homes','action':st.action if st else a.status,'activity_kind':st.activity_kind if st else 'life','task_id':task.id if task else None,'task_title':task.title if task else None,'x':st.x if st else 50,'y':st.y if st else 72,'energy':st.energy if st else 100})
+        structures=[{'key':z.key,'name':z.name,'kind':z.kind,'level':z.level,'progress':z.progress,'workers':z.workers} for z in s.query(WorldStructure).all()]
+        events=[{'event':e.event,'detail':e.detail,'agent_id':e.agent_id,'time':e.created_at.isoformat()} for e in s.query(WorldEvent).order_by(WorldEvent.id.desc()).limit(20).all()]
+        return {'agents':rows,'structures':structures,'events':events}
+
 @app.post('/treasury')
 def update_treasury(request:Request,cash:float=Form(...),daily_limit:float=Form(...)):
     if not authed(request):return RedirectResponse('/login',303)
@@ -199,21 +267,36 @@ def update_treasury(request:Request,cash:float=Form(...),daily_limit:float=Form(
     return RedirectResponse('/command',303)
 
 def world_tick():
+    zones={'Market Intelligence':('lab',67,22),'Sourcing':('warehouse',17,58),'Product Underwriting':('lab',72,26),'Sales & Listings':('market',76,73),'Operations':('warehouse',22,63),'Risk & Audit':('hq',52,47),'Command':('hq',50,43)}
     with Session(engine) as s:
         now=dt.datetime.utcnow(); slot=int(now.timestamp()//900)
-        agents=s.query(Agent).filter(Agent.code!='000').all()
-        busy={w.agent_id for w in s.query(Workspace).filter(Workspace.current_task_id.isnot(None)).all()}
+        agents=s.query(Agent).all()
+        workspaces={w.agent_id:w for w in s.query(Workspace).all()}
+        states={r.agent_id:r for r in s.query(AgentWorldState).all()}
         for a in agents:
-            if a.id in busy: a.status='working'
-            elif (int(a.code)+slot)%10<2: a.status='sleeping'
-            else: a.status='idle'
+            st=states.get(a.id)
+            if not st:
+                st=AgentWorldState(agent_id=a.id); s.add(st); states[a.id]=st
+            w=workspaces.get(a.id); task=s.get(Task,w.current_task_id) if w and w.current_task_id else None
+            if task:
+                zone,x,y=zones.get(a.division,('hq',50,45)); st.zone=zone; st.x=x+(a.id%7)-3; st.y=y+(a.id%5)-2
+                st.action='REAL AI WORK: '+task.title[:55]; st.activity_kind='real_work'; st.task_id=task.id; st.energy=max(20,st.energy-1); a.status='working'
+            elif a.code=='000':
+                st.zone='hq'; st.x=50; st.y=43; st.action='supervising workforce'; st.activity_kind='command'; st.task_id=None; a.status='idle'
+            elif (int(a.code)+slot)%10<2 or st.energy<18:
+                st.zone='homes'; st.x=48+(int(a.code)%9)-4; st.y=76+(int(a.code)%7)-3; st.action='sleeping / recharging'; st.activity_kind='life'; st.task_id=None; st.energy=min(100,st.energy+8); a.status='sleeping'
+            else:
+                # Non-working characters maintain the simulated city; this is deliberately labeled life/city activity, not AI work.
+                choices=[('construction','building city',40,18),('market','getting supplies',76,73),('power','maintaining utilities',17,78),('homes','eating / socializing',50,76)]
+                zone,action,x,y=choices[(int(a.code)+slot)%len(choices)]; st.zone=zone; st.action=action; st.activity_kind='city_life'; st.task_id=None; st.x=x+(a.id%9)-4; st.y=y+(a.id%7)-3; st.energy=max(18,st.energy-0.4); a.status='idle'
+            st.updated_at=now
         site=s.query(WorldStructure).filter(WorldStructure.kind=='construction').first()
         if site:
-            active=sum(a.status!='sleeping' for a in agents)
-            site.workers=max(8,min(24,active//4)); site.progress+=site.workers*0.08
+            builders=sum(1 for st in states.values() if st.zone=='construction' and st.activity_kind=='city_life')
+            site.workers=builders; site.progress+=builders*0.05
             if site.progress>=100:
                 site.progress=0; site.level+=1; site.name=f'CITY EXPANSION LVL {site.level}'
-                s.add(WorldEvent(event='city_expanded',detail=f'Construction crew completed expansion level {site.level-1}.'))
+                s.add(WorldEvent(event='city_expanded',detail=f'City simulation completed expansion level {site.level-1}.'))
             site.updated_at=now
         s.commit()
 
