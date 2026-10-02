@@ -88,21 +88,21 @@ def command(request:Request):
         <div class="card"><h2 style="margin-top:0">Treasury</h2><div class="money">USD {treasury.available_cash:,.2f}</div><div class="muted">{live}</div><p>Daily proposal ceiling: <b>USD {treasury.daily_limit:,.2f}</b></p><p class="muted">Agents may detect opportunities and prepare proposals. Actual purchases/transfers require owner approval.</p><form method="post" action="/treasury"><input name="cash" type="number" min="0" step="0.01" placeholder="Available cash"><input name="daily_limit" type="number" min="0" step="0.01" value="{treasury.daily_limit}"><button class="btn">UPDATE TREASURY</button></form></div></div>
         <h2>Opportunity / Spending Proposals</h2><div class="card">{prop}</div><h2>Live Activity</h2><div class="card">{feed}</div></div><script>
 const map=document.getElementById('worldmap');
-function roam(){
-  document.querySelectorAll('.avatar').forEach((m,i)=>{
+function roam(){{
+  document.querySelectorAll('.avatar').forEach((m,i)=>{{
     const status=m.dataset.status;
-    if(status==='working'){
+    if(status==='working'){{
       const x=parseFloat(m.style.left), y=parseFloat(m.style.top);
       m.style.left=Math.max(3,Math.min(95,x+(Math.random()*8-4)))+'%';
       m.style.top=Math.max(4,Math.min(92,y+(Math.random()*7-3.5)))+'%';
-    }else if(status==='sleeping'){
+    }}else if(status==='sleeping'){{
       m.style.left=m.dataset.homeX+'%'; m.style.top=m.dataset.homeY+'%';
-    }else{
-      if(Math.random()<.35){m.style.left=m.dataset.homeX+'%';m.style.top=m.dataset.homeY+'%'}
-      else {m.style.left=(50+Math.random()*44)+'%';m.style.top=(70+Math.random()*22)+'%'}
-    }
-  });
-}
+    }}else{{
+      if(Math.random()<.35){{m.style.left=m.dataset.homeX+'%';m.style.top=m.dataset.homeY+'%'}}
+      else {{m.style.left=(50+Math.random()*44)+'%';m.style.top=(70+Math.random()*22)+'%'}}
+    }}
+  }});
+}}
 setInterval(roam,3800); setTimeout(roam,500); setTimeout(()=>location.reload(),30000);
 </script>'''
         return page('MINION World',body)
