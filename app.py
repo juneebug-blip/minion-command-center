@@ -43,7 +43,7 @@ def seed():
             s.commit()
 seed()
 app=FastAPI(title='MINION Command Center',version='1.1'); app.add_middleware(SessionMiddleware,secret_key=os.getenv('SESSION_SECRET',secrets.token_hex(32)),max_age=86400*7,https_only=False)
-CSS='''<style>*{box-sizing:border-box}body{margin:0;background:#071018;color:#e8f0f6;font-family:Inter,Arial,sans-serif}.top{padding:20px 28px;border-bottom:1px solid #21303c;display:flex;justify-content:space-between;align-items:center}.brand{font-weight:900;letter-spacing:2px}.wrap{max-width:1400px;margin:auto;padding:24px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px}.card,.metric{background:#0e1a24;border:1px solid #21303c;border-radius:14px;padding:16px}.card:hover{border-color:#587184}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}.num{font-size:28px;font-weight:800}.muted{color:#91a5b5;font-size:13px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#55d187;margin-right:7px}.working{background:#55d187}.idle{background:#e6bd52}.error{background:#ef6a6a}.pill{padding:4px 8px;border-radius:99px;background:#152633;font-size:11px}.btn{display:inline-block;padding:10px 14px;background:#e8f0f6;color:#071018;border-radius:9px;text-decoration:none;font-weight:700;border:0;cursor:pointer}.log{background:#08131c;padding:12px;border-radius:9px;white-space:pre-wrap;max-height:360px;overflow:auto}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.world{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin:18px 0}.hq{min-height:260px;background:linear-gradient(180deg,#0d1b26,#08131c);border:1px solid #21303c;border-radius:14px;padding:16px}.zones{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.zone{background:#10212d;border:1px solid #29404f;border-radius:12px;padding:12px;min-height:92px}.avatar{display:inline-flex;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;background:#e6bd52;color:#071018;font-size:10px;font-weight:900;margin:3px}.avatar.working{background:#55d187}.avatar.sleeping{background:#6f7fce}.money{font-size:22px;font-weight:900}a{color:inherit;text-decoration:none}input{width:100%;padding:12px;background:#0b1720;color:white;border:1px solid #2a3b47;border-radius:8px;margin:8px 0 14px}@media(max-width:700px){.metrics{grid-template-columns:1fr 1fr}.world{grid-template-columns:1fr}.zones{grid-template-columns:1fr 1fr}.wrap{padding:14px}.top{padding:16px}}</style>'''
+CSS='''<style>*{box-sizing:border-box}body{margin:0;background:#071018;color:#e8f0f6;font-family:Inter,Arial,sans-serif}.top{padding:20px 28px;border-bottom:1px solid #21303c;display:flex;justify-content:space-between;align-items:center}.brand{font-weight:900;letter-spacing:2px}.wrap{max-width:1400px;margin:auto;padding:24px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px}.card,.metric{background:#0e1a24;border:1px solid #21303c;border-radius:14px;padding:16px}.card:hover{border-color:#587184}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}.num{font-size:28px;font-weight:800}.muted{color:#91a5b5;font-size:13px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#55d187;margin-right:7px}.working{background:#55d187}.idle{background:#e6bd52}.error{background:#ef6a6a}.pill{padding:4px 8px;border-radius:99px;background:#152633;font-size:11px}.btn{display:inline-block;padding:10px 14px;background:#e8f0f6;color:#071018;border-radius:9px;text-decoration:none;font-weight:700;border:0;cursor:pointer}.log{background:#08131c;padding:12px;border-radius:9px;white-space:pre-wrap;max-height:360px;overflow:auto}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.world{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin:18px 0}.hq{min-height:260px;background:linear-gradient(180deg,#0d1b26,#08131c);border:1px solid #21303c;border-radius:14px;padding:16px}.zones{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.zone{background:#10212d;border:1px solid #29404f;border-radius:12px;padding:12px;min-height:92px}.avatar{position:absolute;width:26px;height:38px;border-radius:45% 45% 38% 38%;background:#f4c542;border:2px solid #d7aa25;color:#071018;font-size:7px;font-weight:900;text-align:center;padding-top:15px;transition:left 3.5s ease-in-out,top 3.5s ease-in-out;z-index:5;box-shadow:0 3px 8px #0008}.avatar:before{content:'';position:absolute;left:4px;top:6px;width:14px;height:8px;border-radius:8px;background:#dce8ee;border:2px solid #28333b;box-shadow:0 0 0 1px #111}.avatar:after{content:'';position:absolute;left:3px;bottom:-7px;width:18px;height:9px;border-radius:2px;background:#315b91;border-bottom:4px solid #151c22}.avatar.working{background:#f4c542}.avatar.sleeping{opacity:.65}.worldmap{position:relative;height:610px;overflow:hidden;background:linear-gradient(#122431,#09141d);border:1px solid #29404f;border-radius:14px}.room{position:absolute;background:#10212d;border:2px solid #29404f;border-radius:12px;padding:8px;color:#e8f0f6}.room b{font-size:11px}.room small{display:block;color:#91a5b5;font-size:9px}.desk{position:absolute;width:22px;height:10px;background:#6d4b31;border-radius:2px;opacity:.8}.bed{position:absolute;width:25px;height:13px;background:#53637c;border-radius:4px}.money{font-size:22px;font-weight:900}a{color:inherit;text-decoration:none}input{width:100%;padding:12px;background:#0b1720;color:white;border:1px solid #2a3b47;border-radius:8px;margin:8px 0 14px}@media(max-width:700px){.metrics{grid-template-columns:1fr 1fr}.world{grid-template-columns:1fr}.zones{grid-template-columns:1fr 1fr}.wrap{padding:14px}.top{padding:16px}}</style>'''
 def page(title,body): return HTMLResponse(f'<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title>{CSS}</head><body>{body}</body></html>')
 def authed(r): return r.session.get('owner') is True
 @app.get('/login',response_class=HTMLResponse)
@@ -65,22 +65,46 @@ def command(request:Request):
         treasury=s.query(Treasury).first(); proposals=s.query(Proposal).order_by(Proposal.id.desc()).limit(8).all()
         working=sum(a.status=='working' for a in agents); sleeping=sum(a.status=='sleeping' for a in agents)
         queued=s.query(Task).filter(Task.status=='queued').count(); done=s.query(Task).filter(Task.status=='completed').count()
-        zones={}
+        room_pos={'Command':(2,2,20,20),'Market Intelligence':(24,2,35,28),'Sourcing':(61,2,37,28),'Product Underwriting':(2,33,31,30),'Sales & Listings':(35,33,31,30),'Operations':(68,33,30,30),'Risk & Audit':(2,66,45,31)}
+        rooms=''
+        for name,(x,y,wid,hei) in room_pos.items():
+            label='COMMAND DECK' if name=='Command' else name.upper()
+            rooms+=f'<div class="room" style="left:{x}%;top:{y}%;width:{wid}%;height:{hei}%"><b>{label}</b><small>WORK ZONE</small></div>'
+        rooms+='<div class="room" style="left:49%;top:66%;width:49%;height:31%"><b>MINION VILLAGE</b><small>BEDS · BREAK AREA · HOMES</small></div>'
+        avatars=''
         for a in agents:
-            zone='Command Deck' if a.code=='000' else a.division
-            zones.setdefault(zone,[]).append(a)
-        zone_html=''
-        for z,members in zones.items():
-            icons=''.join(f'<a href="/minion/{a.code}" title="{a.name}: {a.status}" class="avatar {a.status}">{a.code}</a>' for a in members)
-            zone_html+=f'<div class="zone"><b>{z}</b><div class="muted">{len(members)} residents</div><div style="margin-top:7px">{icons}</div></div>'
+            if a.code=='000': x,y=10,11
+            else:
+                rx,ry,rw,rh=room_pos[a.division]
+                n=int(a.code); col=(n-1)%7; row=((n-1)//7)%3
+                x=rx+4+(col*max(3,(rw-10)/7)); y=ry+8+(row*6)
+            avatars+=f'<a href="/minion/{a.code}" data-code="{a.code}" data-status="{a.status}" data-home-x="{50+(int(a.code or 0)%10)*4 if a.code!="000" else 10}" data-home-y="{73+(int(a.code or 0)%4)*5 if a.code!="000" else 11}" style="left:{x}%;top:{y}%" title="{a.name}: {a.status}" class="avatar {a.status}">{a.code}</a>'
         feed=''.join(f'<div class="row" style="padding:8px 0;border-bottom:1px solid #182733"><span>#{t.id} {t.title}</span><span class="pill">{t.status}</span></div>' for t in tasks) or '<div class="muted">No tasks yet.</div>'
         prop=''.join(f'<div style="padding:10px 0;border-bottom:1px solid #182733"><b>{p.title}</b><div class="muted">Minion #{p.agent_id} · USD {p.amount:,.2f} proposed · est. profit USD {p.est_profit:,.2f} · {p.status}</div></div>' for p in proposals) or '<div class="muted">No spending proposals. Minions cannot spend automatically.</div>'
         live='LIVE MONEY DETECTED' if treasury.available_cash>0 else 'SIMULATION / ZERO TREASURY'
         body=f'''<div class="top"><div><div class="brand">MINION WORLD // DIGITAL HQ</div><div class="muted">Commander #000 + 100 autonomous research workers</div></div><a href="/logout" class="muted">Logout</a></div>
         <div class="wrap"><div class="metrics"><div class="metric"><div class="num">{working}</div><div class="muted">WORKING NOW</div></div><div class="metric"><div class="num">{sleeping}</div><div class="muted">SLEEPING</div></div><div class="metric"><div class="num">{queued}</div><div class="muted">QUEUED</div></div><div class="metric"><div class="num">{done}</div><div class="muted">COMPLETED</div></div></div>
-        <div class="world"><div class="hq"><div class="row"><div><h2 style="margin:0">Minion Headquarters</h2><div class="muted">Every worker has a workspace, warehouse and home state.</div></div><form method="post" action="/commander/bootstrap"><button class="btn">WAKE & DEPLOY ALL</button></form></div><div class="zones" style="margin-top:14px">{zone_html}</div></div>
+        <div class="world"><div class="hq"><div class="row"><div><h2 style="margin:0">Minion Headquarters</h2><div class="muted">Watch the Minions move between work zones and Minion Village.</div></div><form method="post" action="/commander/bootstrap"><button class="btn">WAKE & DEPLOY ALL</button></form></div><div class="worldmap" id="worldmap" style="margin-top:14px">{rooms}{avatars}</div></div>
         <div class="card"><h2 style="margin-top:0">Treasury</h2><div class="money">USD {treasury.available_cash:,.2f}</div><div class="muted">{live}</div><p>Daily proposal ceiling: <b>USD {treasury.daily_limit:,.2f}</b></p><p class="muted">Agents may detect opportunities and prepare proposals. Actual purchases/transfers require owner approval.</p><form method="post" action="/treasury"><input name="cash" type="number" min="0" step="0.01" placeholder="Available cash"><input name="daily_limit" type="number" min="0" step="0.01" value="{treasury.daily_limit}"><button class="btn">UPDATE TREASURY</button></form></div></div>
-        <h2>Opportunity / Spending Proposals</h2><div class="card">{prop}</div><h2>Live Activity</h2><div class="card">{feed}</div></div><script>setTimeout(()=>location.reload(),7000)</script>'''
+        <h2>Opportunity / Spending Proposals</h2><div class="card">{prop}</div><h2>Live Activity</h2><div class="card">{feed}</div></div><script>
+const map=document.getElementById('worldmap');
+function roam(){
+  document.querySelectorAll('.avatar').forEach((m,i)=>{
+    const status=m.dataset.status;
+    if(status==='working'){
+      const x=parseFloat(m.style.left), y=parseFloat(m.style.top);
+      m.style.left=Math.max(3,Math.min(95,x+(Math.random()*8-4)))+'%';
+      m.style.top=Math.max(4,Math.min(92,y+(Math.random()*7-3.5)))+'%';
+    }else if(status==='sleeping'){
+      m.style.left=m.dataset.homeX+'%'; m.style.top=m.dataset.homeY+'%';
+    }else{
+      if(Math.random()<.35){m.style.left=m.dataset.homeX+'%';m.style.top=m.dataset.homeY+'%'}
+      else {m.style.left=(50+Math.random()*44)+'%';m.style.top=(70+Math.random()*22)+'%'}
+    }
+  });
+}
+setInterval(roam,3800); setTimeout(roam,500); setTimeout(()=>location.reload(),30000);
+</script>'''
         return page('MINION World',body)
 @app.get('/minion/{code}',response_class=HTMLResponse)
 def minion_view(code:str,request:Request):
