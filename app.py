@@ -101,7 +101,7 @@ def command(request:Request):
         agent_data=[{'code':x.code,'name':x.name,'division':x.division,'status':x.status} for x in agents]
         api_state='ONLINE' if os.getenv('OPENAI_API_KEY') else 'OFFLINE'
         body=f'''<div id="ow"><div class="gamebar"><div><b>MINION WORLD</b><span>OPEN WORLD OPERATIONS</span></div><div class="game-stats"><span>AI {api_state}</span><span>{working} WORKING</span><span>{sleeping} RESTING</span><span>{queued} QUEUED</span><span>{done} DONE</span><span>USD {treasury.available_cash:,.2f}</span></div><a href="/logout">EXIT</a></div>
-<div style="max-width:1280px;margin:12px auto;background:#0b1720;border:1px solid #314651;border-radius:8px;padding:10px"><form method="post" action="/commander/mission" style="display:grid;grid-template-columns:1fr auto;gap:8px"><input name="objective" required placeholder="COMMANDER OBJECTIVE — tell the workforce what real work you want accomplished" style="margin:0"><button class="btn">DEPLOY WORKFORCE</button></form><div class="muted" style="margin-top:6px">Real AI assignments are delegated across specialist divisions. City-life activity is separate and clearly labeled.</div></div><div class="viewport"><canvas id="world" width="1280" height="720" tabindex="0"></canvas><div class="hud top-left"><b id="clock">08:00</b><small>CITY ONLINE</small></div><div class="hud top-right"><b>COMMANDER NETWORK</b><small>AI {api_state} · ERRORS {errors}</small></div><div class="hud bottom-left"><div class="minimap"><canvas id="mini" width="150" height="100"></canvas></div><small>WASD / ARROWS · CLICK WORKER · SPACE PAUSE</small></div><div class="hud bottom-right" id="person"><b>CITY MODE</b><small>Click a worker to inspect their life and work.</small></div></div>
+<div style="max-width:1280px;margin:10px auto;display:flex;gap:8px;align-items:center"><a class="btn" href="/api/diagnostics" target="_blank">OPEN DIAGNOSTICS</a><form method="post" action="/tasks/retry-failed" style="margin:0"><button class="btn">RETRY FAILED AI JOBS</button></form><span class="muted">Use diagnostics first. Failed jobs no longer loop forever as queued.</span></div><div style="max-width:1280px;margin:12px auto;background:#0b1720;border:1px solid #314651;border-radius:8px;padding:10px"><form method="post" action="/commander/mission" style="display:grid;grid-template-columns:1fr auto;gap:8px"><input name="objective" required placeholder="COMMANDER OBJECTIVE — tell the workforce what real work you want accomplished" style="margin:0"><button class="btn">DEPLOY WORKFORCE</button></form><div class="muted" style="margin-top:6px">Real AI assignments are delegated across specialist divisions. City-life activity is separate and clearly labeled.</div></div><div class="viewport"><canvas id="world" width="1280" height="720" tabindex="0"></canvas><div class="hud top-left"><b id="clock">08:00</b><small>CITY ONLINE</small></div><div class="hud top-right"><b>COMMANDER NETWORK</b><small>AI {api_state} · ERRORS {errors}</small></div><div class="hud bottom-left"><div class="minimap"><canvas id="mini" width="150" height="100"></canvas></div><small>WASD / ARROWS · CLICK WORKER · SPACE PAUSE</small></div><div class="hud bottom-right" id="person"><b>CITY MODE</b><small>Click a worker to inspect their life and work.</small></div></div>
 <div class="controlstrip"><button type="button" id="follow">FOLLOW SELECTED</button><button type="button" id="overview">CITY OVERVIEW</button><button type="button" id="speed">SPEED 1×</button><button type="button" id="pause">PAUSE</button><form method="post" action="/missions/create"><input id="worker" name="assigned_code" placeholder="Worker #"><input name="title" required placeholder="Mission"><input name="instructions" required placeholder="What should they accomplish?"><button>DISPATCH</button></form></div></div>
 <script>
 const DATA=__AGENT_DATA__;
@@ -188,14 +188,15 @@ Return compact JSON with summary, findings, evidence_needed, next_tasks, warehou
             except Exception: pass
             s.add(WorldEvent(agent_id=a.id,event='task_completed',detail=t.title)); s.commit()
         except Exception as e:
-            t.status='queued'; a.status='idle'; w.current_task_id=None; w.desk_notes=f'Last error: {e}'; s.commit()
+            err=str(e)[:1800]
+            t.status='failed'; t.result='ERROR: '+err; a.status='idle'; w.current_task_id=None; w.desk_notes='Last error: '+err; w.updated_at=dt.datetime.utcnow(); s.add(WorldEvent(agent_id=a.id,event='task_failed',detail=f'{t.title}: {err[:500]}')); s.commit()
 
 def run_cycle():
     if not os.getenv('OPENAI_API_KEY'):return
     claimed=[]
     with Session(engine) as s:
         capacity=max(1,min(int(os.getenv('MINION_CONCURRENCY','12')),100))
-        tasks=s.query(Task).filter(Task.status=='queued').order_by(Task.priority.desc(),Task.id).limit(capacity).all(); used=set()
+        tasks=s.query(Task).filter(Task.status=='queued').order_by(Task.priority.desc(),Task.id).limit(max(capacity*8,100)).all(); used=set()
         for t in tasks:
             a=choose_agent(s,t)
             if not a or a.id in used:continue
@@ -314,6 +315,28 @@ def bootstrap(request:Request):
                 a.status='idle'; s.add(Task(title=f'World mission for Minion {a.code}',instructions=a.mission+' Build or improve your part of the digital headquarters while performing useful research. Identify data/tools needed, useful opportunities, risks, and next work. If an opportunity could require money, create only a proposal and never spend.',assigned_agent=a.id,priority=80))
             s.add(WorldEvent(event='world_wakeup',detail='Commander deployed all 100 Minions.')); s.commit()
     return RedirectResponse('/command',303)
+@app.get('/api/diagnostics')
+def diagnostics(request:Request):
+    if not authed(request): raise HTTPException(401,'login required')
+    with Session(engine) as s:
+        failed=s.query(Task).filter(Task.status=='failed').order_by(Task.id.desc()).limit(25).all()
+        ws=s.query(Workspace).all()
+        workspace_errors=[{'agent_id':w.agent_id,'error':(w.desk_notes or '')[:1000]} for w in ws if (w.desk_notes or '').startswith('Last error:')]
+        return {'openai_key_present':bool(os.getenv('OPENAI_API_KEY')),'model':os.getenv('MINION_MODEL','gpt-5-mini'),'failed_count':s.query(Task).filter(Task.status=='failed').count(),'failed_tasks':[{'id':t.id,'title':t.title,'agent_id':t.assigned_agent,'error':t.result[:1200]} for t in failed],'workspace_errors':workspace_errors[:25]}
+
+@app.post('/tasks/retry-failed')
+def retry_failed(request:Request):
+    if not authed(request): return RedirectResponse('/login',303)
+    with Session(engine) as s:
+        for t in s.query(Task).filter(Task.status=='failed').all():
+            t.status='queued'; t.result=''; t.completed_at=None
+        for a in s.query(Agent).all():
+            if a.status=='working': a.status='idle'
+        for w in s.query(Workspace).all():
+            if w.current_task_id and (s.get(Task,w.current_task_id) is None or s.get(Task,w.current_task_id).status!='working'): w.current_task_id=None
+        s.add(WorldEvent(event='failed_tasks_retried',detail='Owner retried failed AI tasks after diagnostics review.')); s.commit()
+    return RedirectResponse('/command',303)
+
 @app.get('/api/status')
 def status():
     with Session(engine) as s:
